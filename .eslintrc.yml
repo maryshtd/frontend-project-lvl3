@@ -9,6 +9,7 @@ plugins:
 parserOptions:
   ecmaVersion: latest
   sourceType: module
+  allowImportExportEverywhere: true
 rules:
   import/extensions: 0
   no-console: 0
