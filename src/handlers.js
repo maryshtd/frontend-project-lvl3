@@ -4,7 +4,6 @@ import { string } from 'yup';
 import parseFeed from './rssParser.js';
 
 const handleAddingFeed = (e, state) => {
-  e.stopPropagation();
   e.preventDefault();
   state.formState = 'loading';
   const formData = new FormData(e.target);
