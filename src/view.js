@@ -97,9 +97,9 @@ const renderPosts = (state, elements) => {
   postCard.append(postList);
 };
 
-const renderFail = (state, elements) => {
+const renderErrors = (state, elements) => {
   const { feedbackPlaceholder } = elements;
-  [...feedbackPlaceholder.textContent] = state.errors;
+  feedbackPlaceholder.textContent = state.error;
 };
 
 const removeFeedback = (elements) => {
@@ -114,4 +114,4 @@ const render = (state, elements) => {
   renderPosts(state, elements);
 };
 
-export { render, renderFail, removeFeedback };
+export { render, renderErrors, removeFeedback };
