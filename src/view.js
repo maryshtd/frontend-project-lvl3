@@ -26,7 +26,6 @@ const renderPostsSection = (elements) => {
   const postsCard = document.createElement('div');
   postsCard.classList.add('card', 'border-0');
   postsPlaceholder.append(postsCard);
-
   const cardBody = document.createElement('div');
   cardBody.classList.add('card-body');
   postsCard.append(cardBody);
