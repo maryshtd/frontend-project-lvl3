@@ -1,3 +1,6 @@
+/* eslint-disable no-param-reassign */
+import onChange from 'on-change';
+
 const renderFeedsSection = (elements) => {
   const { feedsPlaceholder } = elements;
   feedsPlaceholder.innerHTML = '';
@@ -58,9 +61,15 @@ const renderFeeds = (state, elements) => {
   feedsCard.appendChild(feedList);
 };
 
-const renderPostLink = (post) => {
+const renderPostLink = (state, post) => {
   const postLink = document.createElement('a');
-  postLink.classList.add('fw-bold');
+  const isRead = state.viewedPosts.filter((item) => item === post.id);
+  if (isRead.length > 0) {
+    postLink.classList.remove('fw-bold');
+    postLink.classList.add('fw-normal');
+  } else {
+    postLink.classList.add('fw-bold');
+  }
   postLink.setAttribute('href', post.link);
   postLink.setAttribute('target', '_blank');
   postLink.setAttribute('data-id', post.id);
@@ -70,7 +79,7 @@ const renderPostLink = (post) => {
   return postLink;
 };
 
-const renderViewButton = (post) => {
+const renderViewButton = (state, post, elements) => {
   const viewButton = document.createElement('button');
   viewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
   viewButton.setAttribute('type', 'button');
@@ -78,6 +87,13 @@ const renderViewButton = (post) => {
   viewButton.setAttribute('data-bs-toggle', 'modal');
   viewButton.setAttribute('data-bs-target', '#modal');
   viewButton.textContent = 'Просмотр';
+  viewButton.addEventListener('click', () => {
+    const { modalTitle, modalBody, modalBtn } = elements;
+    modalTitle.textContent = post.title;
+    modalBody.textContent = post.description;
+    modalBtn.setAttribute('href', post.link);
+    state.viewedPosts.push(post.id);
+  });
   return viewButton;
 };
 
@@ -88,9 +104,9 @@ const renderPosts = (state, elements) => {
   state.posts.forEach((post) => {
     const postElement = document.createElement('li');
     postElement.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    const postLink = renderPostLink(post);
+    const postLink = renderPostLink(state, post);
     postElement.append(postLink);
-    const viewButton = renderViewButton(post);
+    const viewButton = renderViewButton(state, post, elements);
     postElement.append(viewButton);
     postList.append(postElement);
   });
@@ -99,7 +115,14 @@ const renderPosts = (state, elements) => {
 
 const renderErrors = (state, elements) => {
   const { feedbackPlaceholder } = elements;
+  feedbackPlaceholder.classList.add('text-danger');
   feedbackPlaceholder.textContent = state.error;
+};
+
+const renderSuccess = (state, elements, i18nInstance) => {
+  const { feedbackPlaceholder } = elements;
+  feedbackPlaceholder.classList.add('text-success');
+  feedbackPlaceholder.textContent = i18nInstance.t('success');
 };
 
 const removeFeedback = (elements) => {
@@ -107,11 +130,38 @@ const removeFeedback = (elements) => {
   feedbackPlaceholder.textContent = '';
 };
 
-const render = (state, elements) => {
+const renderFeed = (state, elements) => {
   const { rssInput } = elements;
   rssInput.value = '';
   renderFeeds(state, elements);
   renderPosts(state, elements);
 };
 
-export { render, renderErrors, removeFeedback };
+export default (state, elements, i18nInstance) => {
+  const watchedState = onChange(state, (path, value) => {
+    switch (path) {
+      case 'formState':
+        if (value === 'loading') {
+          removeFeedback(elements);
+        }
+        if (value === 'loaded') {
+          renderFeed(watchedState, elements);
+          renderSuccess(watchedState, elements, i18nInstance);
+        }
+        if (value === 'failed') {
+          renderErrors(watchedState, elements);
+        }
+        break;
+      case 'posts':
+        renderFeed(watchedState, elements);
+        break;
+      case 'viewedPosts':
+        renderFeed(watchedState, elements);
+        break;
+      default:
+        break;
+    }
+  });
+
+  return watchedState;
+};

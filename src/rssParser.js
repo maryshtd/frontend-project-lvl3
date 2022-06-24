@@ -1,6 +1,8 @@
 import { uniqueId } from 'lodash';
 
-const parseFeed = (xmlData) => {
+const parseFeed = (response) => {
+  const domparser = new DOMParser();
+  const xmlData = domparser.parseFromString(response.data.contents, 'text/xml');
   // get title
   const feedTitle = xmlData.getElementsByTagName('title')[0].textContent;
   // get description

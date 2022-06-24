@@ -1,15 +1,16 @@
 import 'bootstrap';
 import './scss/index.scss';
-import onChange from 'on-change';
+
 import i18n from 'i18next';
 import { setLocale } from 'yup';
-import { render, renderErrors, removeFeedback } from './view.js';
+import initView from './view.js';
 import resources from './locales/index.js';
 import handleAddingFeed from './handlers.js';
 
 const app = async () => {
   const state = {
     rssLinks: [],
+    viewedPosts: [],
     feeds: [],
     posts: [],
     error: '',
@@ -30,40 +31,27 @@ const app = async () => {
       },
       string: {
         url: () => i18nInstance.t('errors.invalidUrl'),
+        matches: () => i18nInstance.t('errors.invalidRSS'),
       },
     });
   });
 
   const elements = {
     rssInput: document.querySelector('#url-input'),
-
     feedsPlaceholder: document.querySelector('.feeds'),
     postsPlaceholder: document.querySelector('.posts'),
     feedbackPlaceholder: document.querySelector('.feedback'),
+    form: document.querySelector('.rss-form'),
+    modalWindow: document.getElementById('modal'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalBtn: document.querySelector('.full-article'),
   };
 
-  const watchedState = onChange(state, (path, value) => {
-    switch (path) {
-      case 'formState':
-        if (value === 'loading') {
-          removeFeedback(elements);
-        }
-        if (value === 'loaded') {
-          render(watchedState, elements);
-        }
-        if (value === 'failed') {
-          renderErrors(watchedState, elements);
-        }
-        break;
-      case 'updateState':
-        break;
-      default:
-        break;
-    }
-  });
-  const form = document.querySelector('.rss-form');
-  form.addEventListener('submit', (e) => {
-    handleAddingFeed(e, watchedState);
+  const watchedState = initView(state, elements, i18nInstance);
+
+  elements.form.addEventListener('submit', (e) => {
+    handleAddingFeed(e, watchedState, i18nInstance);
   });
 };
 

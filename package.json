@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "description": "My webpack project",
-  "name": "my-webpack-project",
+  "name": "@hexlet/code",
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --mode=production --node-env=production",
@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.18.5",
     "autoprefixer": "^10.4.7",
     "css-loader": "^6.7.1",
     "eslint": "^8.14.0",

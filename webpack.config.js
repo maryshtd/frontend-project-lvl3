@@ -19,7 +19,6 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'index.html',
     }),
-
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
@@ -36,6 +35,7 @@ const config = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-transform-runtime'],
           },
         },
       },

@@ -3,33 +3,56 @@ import axios from 'axios';
 import { string } from 'yup';
 import parseFeed from './rssParser.js';
 
-const handleAddingFeed = (e, state) => {
+const updateRss = (state) => {
+  Promise.all(state.rssLinks.map((link) => {
+    axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${link}`)
+      .then((response) => {
+        const { posts } = parseFeed(response);
+        return posts;
+      })
+      .then((updatedPosts) => {
+        const newPosts = updatedPosts.filter((post) => state.posts.includes(post));
+        if (newPosts.length > 0) {
+          state.posts = [...newPosts, ...state.posts];
+        }
+      })
+      .catch((er) => console.error(er));
+    return null;
+  }));
+
+  setTimeout(() => updateRss(state), 5000);
+};
+
+const handleAddingFeed = (e, state, i18nInstance) => {
   e.preventDefault();
   state.formState = 'loading';
   const formData = new FormData(e.target);
   const link = formData.get('url').trim();
 
   const rssSchema = string()
-    .url('Link should be valid URL')
-    .notOneOf(state.rssLinks, 'RSS already exists')
-    .matches(/[a-z].rss/, 'Resource does not contain valid RSS');
+    .url()
+    .notOneOf(state.rssLinks)
+    .matches(/[a-z].rss/);
 
   rssSchema.validate(link).then(() => {
     axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${link}`)
       .then((response) => {
-        const domparser = new DOMParser();
-        const xmlFeed = domparser.parseFromString(response.data.contents, 'text/xml');
-        const { feed, posts } = parseFeed(xmlFeed);
+        const { feed, posts } = parseFeed(response);
 
         state.feeds.push(feed);
-        posts.forEach((item) => state.posts.push(item));
+        state.posts.push(...posts);
 
         state.formState = 'loaded';
         state.rssLinks.push(link);
+
+        updateRss(state);
       })
-      .catch(() => {
-        state.error = 'Network error';
-        state.formState = 'failed';
+      .catch((err) => {
+        if (err.isAxiosError) {
+          state.error = i18nInstance.t('errors.networkError');
+        } else {
+          state.error = i18nInstance.t('errors.invalidRSS');
+        }
       });
   }).catch((err) => {
     state.error = err.errors;
