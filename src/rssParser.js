@@ -3,13 +3,10 @@ import { uniqueId } from 'lodash';
 const parseFeed = (response) => {
   const domparser = new DOMParser();
   const xmlData = domparser.parseFromString(response.data.contents, 'text/xml');
-  // get title
   const feedTitle = xmlData.getElementsByTagName('title')[0].textContent;
-  // get description
   const feedDescription = xmlData.getElementsByTagName('description')[0].textContent;
-  // create feed obj with title and description
   const feed = { id: uniqueId(), title: feedTitle, description: feedDescription };
-  // get posts from feed
+
   const posts = [];
   Array.from(xmlData.getElementsByTagName('item')).forEach((item) => posts.push({
     feedId: feed.id,

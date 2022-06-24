@@ -15,7 +15,6 @@ const app = async () => {
     posts: [],
     error: '',
     formState: 'filling',
-    updateState: 'filling',
     lng: 'ru',
   };
 
