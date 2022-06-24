@@ -48,10 +48,12 @@ const handleAddingFeed = (e, state, i18nInstance) => {
         updateRss(state);
       })
       .catch((err) => {
-        if (err.isAxiosError) {
+        if (err.name === 'AxiosError') {
           state.error = i18nInstance.t('errors.networkError');
+          state.formState = 'failed';
         } else {
           state.error = i18nInstance.t('errors.invalidRSS');
+          state.formState = 'failed';
         }
       });
   }).catch((err) => {
