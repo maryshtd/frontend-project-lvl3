@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import onChange from 'on-change';
 
-const renderFeedsSection = (elements) => {
+const createFeedsSection = (elements) => {
   const { feedsPlaceholder } = elements;
   feedsPlaceholder.innerHTML = '';
   const feedsCard = document.createElement('div');
@@ -20,7 +20,7 @@ const renderFeedsSection = (elements) => {
   return feedsCard;
 };
 
-const renderPostsSection = (elements) => {
+const createPostsSection = (elements) => {
   const { postsPlaceholder } = elements;
   postsPlaceholder.innerHTML = '';
   const postsCard = document.createElement('div');
@@ -39,7 +39,7 @@ const renderPostsSection = (elements) => {
 };
 
 const renderFeeds = (state, elements) => {
-  const feedsCard = renderFeedsSection(elements);
+  const feedsCard = createFeedsSection(elements);
   const feedList = document.createElement('ul');
   feedList.classList.add('list-group', 'border-0', 'rounded-0');
   state.feeds.forEach((feed) => {
@@ -60,7 +60,7 @@ const renderFeeds = (state, elements) => {
   feedsCard.appendChild(feedList);
 };
 
-const renderPostLink = (state, post) => {
+const addPostLink = (state, post) => {
   const postLink = document.createElement('a');
   const isRead = state.viewedPosts.filter((item) => item === post.id);
   if (isRead.length > 0) {
@@ -78,7 +78,7 @@ const renderPostLink = (state, post) => {
   return postLink;
 };
 
-const renderViewButton = (state, post, elements) => {
+const addViewButton = (state, post, elements) => {
   const viewButton = document.createElement('button');
   viewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
   viewButton.setAttribute('type', 'button');
@@ -97,15 +97,15 @@ const renderViewButton = (state, post, elements) => {
 };
 
 const renderPosts = (state, elements) => {
-  const postCard = renderPostsSection(elements);
+  const postCard = createPostsSection(elements);
   const postList = document.createElement('ul');
   postList.classList.add('list-group', 'border-0', 'rounded-0');
   state.posts.forEach((post) => {
     const postElement = document.createElement('li');
     postElement.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    const postLink = renderPostLink(state, post);
+    const postLink = addPostLink(state, post);
     postElement.append(postLink);
-    const viewButton = renderViewButton(state, post, elements);
+    const viewButton = addViewButton(state, post, elements);
     postElement.append(viewButton);
     postList.append(postElement);
   });
