@@ -49,7 +49,6 @@ const handleAddingFeed = (e, state, i18nInstance) => {
         state.rssLinks.push(link);
       })
       .catch((err) => {
-        console.log(err);
         if (err.name === 'AxiosError') {
           state.error = i18nInstance.t('errors.networkError');
           state.formState = 'failed';
