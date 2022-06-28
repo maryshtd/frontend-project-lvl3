@@ -1,9 +1,10 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 import { string } from 'yup';
+import _ from 'lodash';
 import parseFeed from './rssParser.js';
 
-const updateRss = (state) => {
+export const updateRss = (state) => {
   Promise.all(state.rssLinks.map((link) => {
     axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${link}`)
       .then((response) => {
@@ -11,7 +12,9 @@ const updateRss = (state) => {
         return posts;
       })
       .then((updatedPosts) => {
-        const newPosts = updatedPosts.filter((post) => state.posts.includes(post));
+        const allPosts = _.union(updatedPosts, state.posts);
+        const newPosts = _.differenceBy(allPosts, state.posts, 'link');
+
         if (newPosts.length > 0) {
           state.posts = [...newPosts, ...state.posts];
         }
@@ -44,10 +47,9 @@ const handleAddingFeed = (e, state, i18nInstance) => {
 
         state.formState = 'loaded';
         state.rssLinks.push(link);
-
-        updateRss(state);
       })
       .catch((err) => {
+        console.log(err);
         if (err.name === 'AxiosError') {
           state.error = i18nInstance.t('errors.networkError');
           state.formState = 'failed';

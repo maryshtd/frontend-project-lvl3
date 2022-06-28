@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import { setLocale } from 'yup';
 import initView from './view.js';
 import resources from './locales/index.js';
-import handleAddingFeed from './handlers.js';
+import handleAddingFeed, { updateRss } from './handlers.js';
 
 const app = async () => {
   const state = {
@@ -52,6 +52,8 @@ const app = async () => {
   elements.form.addEventListener('submit', (e) => {
     handleAddingFeed(e, watchedState, i18nInstance);
   });
+
+  updateRss(state);
 };
 
 export default app;

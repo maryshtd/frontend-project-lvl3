@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import onChange from 'on-change';
 
-const createFeedsSection = (elements) => {
+const createFeedsSection = (elements, i18nInstance) => {
   const { feedsPlaceholder } = elements;
   feedsPlaceholder.innerHTML = '';
   const feedsCard = document.createElement('div');
@@ -14,13 +14,13 @@ const createFeedsSection = (elements) => {
 
   const header = document.createElement('h2');
   header.classList.add('card-title', 'h4');
-  header.textContent = 'Фиды';
+  header.textContent = i18nInstance.t('screenTexts.feeds');
   cardBody.append(header);
 
   return feedsCard;
 };
 
-const createPostsSection = (elements) => {
+const createPostsSection = (elements, i18nInstance) => {
   const { postsPlaceholder } = elements;
   postsPlaceholder.innerHTML = '';
   const postsCard = document.createElement('div');
@@ -32,14 +32,14 @@ const createPostsSection = (elements) => {
 
   const header = document.createElement('h2');
   header.classList.add('card-title', 'h4');
-  header.textContent = 'Посты';
+  header.textContent = i18nInstance.t('screenTexts.feeds');
   cardBody.append(header);
 
   return postsCard;
 };
 
-const renderFeeds = (state, elements) => {
-  const feedsCard = createFeedsSection(elements);
+const renderFeeds = (state, elements, i18nInstance) => {
+  const feedsCard = createFeedsSection(elements, i18nInstance);
   const feedList = document.createElement('ul');
   feedList.classList.add('list-group', 'border-0', 'rounded-0');
   state.feeds.forEach((feed) => {
@@ -78,7 +78,7 @@ const addPostLink = (state, post) => {
   return postLink;
 };
 
-const addViewButton = (state, post, elements) => {
+const addViewButton = (state, post) => {
   const viewButton = document.createElement('button');
   viewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm');
   viewButton.setAttribute('type', 'button');
@@ -87,17 +87,24 @@ const addViewButton = (state, post, elements) => {
   viewButton.setAttribute('data-bs-target', '#modal');
   viewButton.textContent = 'Просмотр';
   viewButton.addEventListener('click', () => {
-    const { modalTitle, modalBody, modalBtn } = elements;
-    modalTitle.textContent = post.title;
-    modalBody.textContent = post.description;
-    modalBtn.setAttribute('href', post.link);
     state.viewedPosts.push(post.id);
   });
   return viewButton;
 };
 
-const renderPosts = (state, elements) => {
-  const postCard = createPostsSection(elements);
+const showModal = (state, elements, viewedIds) => {
+  const { modalTitle, modalBody, modalBtn } = elements;
+  // getting last viewed id
+  const id = viewedIds[viewedIds.length - 1];
+  // getting post by id
+  const post = state.posts.filter((item) => item.id === id)[0];
+  modalTitle.textContent = post.title;
+  modalBody.textContent = post.description;
+  modalBtn.setAttribute('href', post.link);
+};
+
+const renderPosts = (state, elements, i18nInstance) => {
+  const postCard = createPostsSection(elements, i18nInstance);
   const postList = document.createElement('ul');
   postList.classList.add('list-group', 'border-0', 'rounded-0');
   state.posts.forEach((post) => {
@@ -118,7 +125,7 @@ const renderErrors = (state, elements) => {
   feedbackPlaceholder.textContent = state.error;
 };
 
-const renderSuccess = (state, elements, i18nInstance) => {
+const renderSuccess = (elements, i18nInstance) => {
   const { feedbackPlaceholder } = elements;
   feedbackPlaceholder.classList.add('text-success');
   feedbackPlaceholder.textContent = i18nInstance.t('success');
@@ -129,33 +136,42 @@ const removeFeedback = (elements) => {
   feedbackPlaceholder.textContent = '';
 };
 
-const renderFeed = (state, elements) => {
+const renderFeed = (state, elements, i18nInstance) => {
   const { rssInput } = elements;
   rssInput.value = '';
-  renderFeeds(state, elements);
-  renderPosts(state, elements);
+  renderFeeds(state, elements, i18nInstance);
+  renderPosts(state, elements, i18nInstance);
+};
+
+const switchFormState = (formState, elements, watchedState, i18nInstance) => {
+  switch (formState) {
+    case 'loading':
+      removeFeedback(elements);
+      break;
+    case 'loaded':
+      renderFeed(watchedState, elements, i18nInstance);
+      renderSuccess(elements, i18nInstance);
+      break;
+    case 'failed':
+      renderErrors(watchedState, elements);
+      break;
+    default:
+      throw new Error('Unknown state');
+  }
 };
 
 export default (state, elements, i18nInstance) => {
   const watchedState = onChange(state, (path, value) => {
     switch (path) {
       case 'formState':
-        if (value === 'loading') {
-          removeFeedback(elements);
-        }
-        if (value === 'loaded') {
-          renderFeed(watchedState, elements);
-          renderSuccess(watchedState, elements, i18nInstance);
-        }
-        if (value === 'failed') {
-          renderErrors(watchedState, elements);
-        }
+        switchFormState(value, elements, watchedState, i18nInstance);
         break;
       case 'posts':
-        renderFeed(watchedState, elements);
+        renderFeed(watchedState, elements, i18nInstance);
         break;
       case 'viewedPosts':
-        renderFeed(watchedState, elements);
+        showModal(watchedState, elements, value);
+        renderFeed(watchedState, elements, i18nInstance);
         break;
       default:
         break;

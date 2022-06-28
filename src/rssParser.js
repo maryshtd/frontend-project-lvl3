@@ -8,8 +8,7 @@ const parseFeed = (response) => {
   const feed = { id: uniqueId(), title: feedTitle, description: feedDescription };
 
   const posts = [];
-  Array.from(xmlData.getElementsByTagName('item')).forEach((item) => posts.push({
-    feedId: feed.id,
+  Array.from(xmlData.getElementsByTagName('item')).map((item) => posts.push({
     id: uniqueId(),
     title: item.getElementsByTagName('title')[0].textContent,
     link: item.getElementsByTagName('link')[0].textContent,
