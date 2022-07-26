@@ -119,10 +119,10 @@ const renderPosts = (state, elements, i18nInstance) => {
   postCard.append(postList);
 };
 
-const renderErrors = (state, elements) => {
+const renderErrors = (state, elements, i18nInstance) => {
   const { feedbackPlaceholder } = elements;
   feedbackPlaceholder.classList.add('text-danger');
-  feedbackPlaceholder.textContent = state.error;
+  feedbackPlaceholder.textContent = i18nInstance.t(state.error);
 };
 
 const renderSuccess = (elements, i18nInstance) => {
@@ -153,7 +153,7 @@ const switchFormState = (formState, elements, watchedState, i18nInstance) => {
       renderSuccess(elements, i18nInstance);
       break;
     case 'failed':
-      renderErrors(watchedState, elements);
+      renderErrors(watchedState, elements, i18nInstance);
       break;
     default:
       throw new Error('Unknown state');

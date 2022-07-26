@@ -50,10 +50,10 @@ const app = async () => {
   const watchedState = initView(state, elements, i18nInstance);
 
   elements.form.addEventListener('submit', (e) => {
-    handleAddingFeed(e, watchedState, i18nInstance);
+    handleAddingFeed(e, watchedState);
   });
 
-  updateRss(state);
+  updateRss(watchedState);
 };
 
 export default app;

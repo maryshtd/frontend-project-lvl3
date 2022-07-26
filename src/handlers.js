@@ -4,15 +4,17 @@ import { string } from 'yup';
 import _ from 'lodash';
 import parseFeed from './rssParser.js';
 
+const generateId = (item) => {
+  item.id = _.uniqueId();
+};
+
 export const updateRss = (state) => {
   Promise.all(state.rssLinks.map((link) => {
     axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${link}`)
       .then((response) => {
         const { posts } = parseFeed(response);
-        return posts;
-      })
-      .then((updatedPosts) => {
-        const allPosts = _.union(updatedPosts, state.posts);
+        posts.forEach((post) => generateId(post));
+        const allPosts = _.union(posts, state.posts);
         const newPosts = _.differenceBy(allPosts, state.posts, 'link');
 
         if (newPosts.length > 0) {
@@ -21,12 +23,12 @@ export const updateRss = (state) => {
       })
       .catch((er) => console.error(er));
     return null;
-  }));
-
-  setTimeout(() => updateRss(state), 5000);
+  })).finally(() => {
+    setTimeout(() => updateRss(state), 5000);
+  });
 };
 
-const handleAddingFeed = (e, state, i18nInstance) => {
+const handleAddingFeed = (e, state) => {
   e.preventDefault();
   state.formState = 'loading';
   const formData = new FormData(e.target);
@@ -42,6 +44,9 @@ const handleAddingFeed = (e, state, i18nInstance) => {
       .then((response) => {
         const { feed, posts } = parseFeed(response);
 
+        generateId(feed);
+        posts.forEach((post) => generateId(post));
+
         state.feeds.push(feed);
         state.posts.push(...posts);
 
@@ -50,10 +55,10 @@ const handleAddingFeed = (e, state, i18nInstance) => {
       })
       .catch((err) => {
         if (err.name === 'AxiosError') {
-          state.error = i18nInstance.t('errors.networkError');
+          state.error = 'errors.networkError';
           state.formState = 'failed';
         } else {
-          state.error = i18nInstance.t('errors.invalidRSS');
+          state.error = 'errors.invalidRSS';
           state.formState = 'failed';
         }
       });
