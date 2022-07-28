@@ -13,9 +13,9 @@ export const updateRss = (state) => {
     axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${link}`)
       .then((response) => {
         const { posts } = parseFeed(response);
-        posts.forEach((post) => generateId(post));
         const allPosts = _.union(posts, state.posts);
         const newPosts = _.differenceBy(allPosts, state.posts, 'link');
+        newPosts.forEach((post) => generateId(post));
 
         if (newPosts.length > 0) {
           state.posts = [...newPosts, ...state.posts];
